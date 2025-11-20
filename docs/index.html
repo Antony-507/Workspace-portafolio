@@ -3,72 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio virtual - Antony</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Iniciar Sesión - Portafolio</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="Recursos/ChatGPT Image 29 jul 2025, 03_10_09 p.m..png" type="image/png">
-    <!-- Los estilos se encuentran ahora en styles.css para mejor mantenimiento -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%239d50bb'/%3E%3Ctext x='50%' y='55%' text-anchor='middle' dominant-baseline='middle' font-size='40' font-family='Poppins, Arial, sans-serif' fill='white'%3EA%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+    <style>
+        body{font-family: 'Poppins', Arial, sans-serif; background: linear-gradient(180deg,#faf6ff,#fff); margin:0}
+        .login-container{max-width:460px;margin:6rem auto;padding:2rem;background:#fff;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,0.08)}
+        .login-container h2{color:#6e48aa;text-align:center;margin-bottom:1rem}
+        .input-with-icon{position:relative;margin-bottom:1rem}
+        .input-with-icon .icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:10px;background:#6e48aa;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+        .input-with-icon input{width:100%;padding:0.9rem 1rem 0.9rem 64px;border:1px solid #eee;border-radius:8px;font-size:1rem}
+        button{width:100%;padding:0.85rem;background:linear-gradient(135deg,#6e48aa,#9d50bb);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+        .small-btns{display:flex;gap:0.6rem;margin-top:0.75rem}
+        .small-btns button{width:unset;flex:1;padding:0.6rem}
+    </style>
 </head>
 <body>
-    <aside class="sidebar" id="sidebar" style="height:100vh; background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%); color:white; display:flex; flex-direction:column; justify-content:flex-start;">
-        <div class="logo" style="padding:1.5rem 1rem 1rem 1rem; text-align:center; border-bottom:1px solid #444; position:relative;">
-            <button class="toggle-btn" id="toggleBtn" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; margin-bottom:1rem;"><i class="fas fa-bars"></i></button>
-            
-            <h2 class="sidebar-text" style="margin:0; font-size:1.5rem;">Antony</h2>
-            <p class="sidebar-text" style="margin:0.2rem 0 0 0; font-size:1rem; color:#eee;">Portafolio personal</p>
-        </div>
-        <nav style="flex:1;">
-            <ul style="list-style:none; padding:0 1rem; margin:2rem 0 0 0;">
-                <li style="margin-bottom:1.5rem;">
-                    <button id="homeBtn" style="width:100%; padding:0.7rem; background:linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%); color:white; border:none; border-radius:6px; cursor:pointer; font-size:1rem; font-weight:500; margin:auto; display:block;"><i class="fas fa-home"></i> <span class="sidebar-text">Inicio</span></button>
-                </li>
-                <li id="uploadBtnLi" style="margin-bottom:1.5rem; display:none;">
-                    <button id="uploadBtn" style="width:100%; padding:0.7rem; background:linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%); color:white; border:none; border-radius:6px; cursor:pointer; font-size:1rem; font-weight:500; margin:auto; display:block;"><i class="fas fa-upload"></i> <span class="sidebar-text">Subir archivos</span></button>
-                </li>
-                <li style="margin-bottom:1rem;">
-                    <div style="font-weight:600; margin-bottom:0.5rem;" class="sidebar-text">Menu Principal</div>
-                    <ul style="list-style:none; padding-left:0.5rem;">
-                        <li id="menuDisenos" style="margin-bottom:0.7rem; display:flex; align-items:center; cursor:pointer;"><i class="fas fa-vector-square"></i> <span class="sidebar-text" style="margin-left:8px;">Diseños</span></li>
-                        <li id="menuJuegos" style="margin-bottom:0.7rem; display:flex; align-items:center; cursor:pointer;"><i class="fas fa-gamepad"></i> <span class="sidebar-text" style="margin-left:8px;">Juegos</span></li>
-                        <li id="menuDesarrollos" style="margin-bottom:0.7rem; display:flex; align-items:center; cursor:pointer;"><i class="fas fa-desktop"></i> <span class="sidebar-text" style="margin-left:8px;">Desarrollos</span></li>
-                        <li id="menuEducacion" style="margin-bottom:0.7rem; display:flex; align-items:center; cursor:pointer;"><i class="fas fa-book"></i> <span class="sidebar-text" style="margin-left:8px;">Educación</span></li>
-                        <li id="menuPersonales" style="margin-bottom:0.7rem; display:flex; align-items:center; cursor:pointer;"><i class="fas fa-user"></i> <span class="sidebar-text" style="margin-left:8px;">Personales</span></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <div id="welcomeMsg" style="text-align:center; margin:1.5rem 0 1rem 0; font-size:1.1rem; color:#fff; animation: fadeIn 1s; background:rgba(157,80,187,0.13); border-radius:8px; padding:0.7rem 1rem;">
-            ¡Bienvenido/a al portafolio virtual de Antony! Explora las secciones del menú para ver fotos y videos.
-        </div>
-        <div id="sidebarFooter" class="sidebar-text" style="background:#fff; color:#6e48aa; text-align:center; padding:1rem; font-size:1rem; margin:0.5rem 1rem 1.5rem 1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-top:1px solid #eee;">
-            &copy; 2025 Antony  <a href="https://www.instagram.com/507antony507/" target="_blank" id="instaLink" style="color:#9d50bb; text-decoration:none; font-weight:600; transition:color 0.2s;">507antony507</a>
-        </div>
-    </aside>
-    <main>
-        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
-            <button id="deleteSelectedBtn" style="background:#e74c3c; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; font-size:1rem; cursor:pointer; display:none;">Borrar seleccionados</button>
-            <span id="selectionInfo" style="color:#6e48aa; font-size:1rem;"></span>
-            <span id="sectionTitle" style="margin-left:auto; color:#9d50bb; font-weight:600; font-size:1.1rem;">Diseños</span>
-        </div>
-        <div class="gallery" id="gallery-disenos"></div>
-        <div class="gallery" id="gallery-juegos" style="display:none;"></div>
-        <div class="gallery" id="gallery-desarrollos" style="display:none;"></div>
-        <div class="gallery" id="gallery-educacion" style="display:none;"></div>
-        <div class="gallery" id="gallery-personales" style="display:none;"></div>
-    </main>
-   
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <div class="input-with-icon">
+                <span class="icon"><i class="fas fa-user"></i></span>
+                <input type="text" id="username" placeholder="Usuario" required>
+            </div>
+            <div class="input-with-icon">
+                <span class="icon"><i class="fas fa-lock"></i></span>
+                <input type="password" id="password" placeholder="Contraseña" required>
+            </div>
+            <button type="submit">Ingresar</button>
+            <div class="small-btns">
+                <button type="button" id="guestBtn" style="background:#f3e8ff;color:#6e48aa">Modo Invitado</button>
+                <button type="button" id="adminPanelBtn" style="background:#444">Panel admin</button>
+            </div>
+        </form>
+    </div>
+    <script src="app.js"></script>
     <script>
-        // Redirige al login si no hay usuario en sessionStorage (login como principal)
-        window.addEventListener('DOMContentLoaded', function() {
-            const usuario = sessionStorage.getItem('usuario');
-            const guestMode = sessionStorage.getItem('guestMode');
-            // Si no hay usuario y no está en modo invitado, redirigir al login
-            if(!usuario && guestMode !== 'true') {
-                window.location.href = 'login.html';
-                return;
-            }
+        document.getElementById('loginForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if(!username || !password){ alert('Completa ambos campos'); return }
+            if(typeof auth !== 'undefined' && auth.login(username,password)){
+                if(username === 'Antony') sessionStorage.removeItem('guestMode');
+                // Al iniciar sesión, ir a la vista principal
+                window.location.href = 'main.html';
+            } else { alert('Usuario o contraseña incorrectos') }
         });
+        document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='main.html' });
+        document.getElementById('adminPanelBtn').addEventListener('click', function(){ window.location.href='admin.html' });
+    </script>
+</body>
+</html>
         // Botón de inicio
         document.getElementById('homeBtn').addEventListener('click', function(e) {
             const btn = this;

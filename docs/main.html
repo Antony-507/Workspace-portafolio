@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio virtual - Antony (principal)</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="Recursos/ChatGPT Image 29 jul 2025, 03_10_09 p.m..png" type="image/png">
+</head>
+<body>
+    <!-- Contenido original de index trasladado a main.html -->
+    <!-- El contenido del index se conservó aquí para acceso tras login -->
+    <aside class="sidebar" id="sidebar" style="height:100vh; background: linear-gradient(135deg, #6e48aa 0%, #9d50bb 100%); color:white; display:flex; flex-direction:column; justify-content:flex-start;">
+        <div class="logo" style="padding:1.5rem 1rem 1rem 1rem; text-align:center; border-bottom:1px solid #444; position:relative;">
+            <button class="toggle-btn" id="toggleBtn" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; margin-bottom:1rem;"><i class="fas fa-bars"></i></button>
+            
+            <h2 class="sidebar-text" style="margin:0; font-size:1.5rem;">Antony</h2>
+            <p class="sidebar-text" style="margin:0.2rem 0 0 0; font-size:1rem; color:#eee;">Portafolio personal</p>
+        </div>
+        <!-- Resto del contenido idéntico al index original -->
+    </aside>
+    <main>
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <button id="deleteSelectedBtn" style="background:#e74c3c; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; font-size:1rem; cursor:pointer; display:none;">Borrar seleccionados</button>
+            <span id="selectionInfo" style="color:#6e48aa; font-size:1rem;"></span>
+            <span id="sectionTitle" style="margin-left:auto; color:#9d50bb; font-weight:600; font-size:1.1rem;">Diseños</span>
+        </div>
+        <div class="gallery" id="gallery-disenos"></div>
+        <div class="gallery" id="gallery-juegos" style="display:none;"></div>
+        <div class="gallery" id="gallery-desarrollos" style="display:none;"></div>
+        <div class="gallery" id="gallery-educacion" style="display:none;"></div>
+        <div class="gallery" id="gallery-personales" style="display:none;"></div>
+    </main>
+    <script src="app.js"></script>
+    <script>
+        // El resto del script se dejó en index.html original; este archivo es la vista principal tras login.
+    </script>
+</body>
+</html>

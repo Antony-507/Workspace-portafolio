@@ -39,5 +39,314 @@
         </form>
     </div>
     <script src="app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if(!username || !password){ alert('Completa ambos campos'); return }
+            if(typeof auth !== 'undefined' && auth.login(username,password)){
+                if(username === 'Antony') sessionStorage.removeItem('guestMode');
+                // Al iniciar sesión, ir a la vista principal
+                window.location.href = 'main.html';
+            } else { alert('Usuario o contraseña incorrectos') }
+        });
+        document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='main.html' });
+        document.getElementById('adminPanelBtn').addEventListener('click', function(){ window.location.href='admin.html' });
+    </script>
+</body>
+</html>
+        // Botón de inicio
+        document.getElementById('homeBtn').addEventListener('click', function(e) {
+            const btn = this;
+            btn.classList.add('btn-pressed');
+            setTimeout(()=>{
+                btn.classList.remove('btn-pressed');
+                window.location.href = 'login.html';
+            }, 180);
+        });
+        // Navegación de secciones
+        window.currentSection = 'disenos';
+        function showSection(section) {
+            window.currentSection = section;
+            const sections = ['disenos','juegos','desarrollos','educacion','personales'];
+            sections.forEach(s => {
+                document.getElementById('gallery-' + s).style.display = (s === section) ? '' : 'none';
+            });
+            document.getElementById('sectionTitle').textContent = {
+                disenos:'Diseños', juegos:'Juegos', desarrollos:'Desarrollos', educacion:'Educación', personales:'Personales'
+            }[section];
+        }
+        document.querySelectorAll('#menuDisenos, #menuJuegos, #menuDesarrollos, #menuEducacion, #menuPersonales').forEach(el => {
+            el.onclick = function() {
+                showSection(this.id.replace('menu','').toLowerCase());
+            };
+        });
+        // Mostrar botón de subida solo si el usuario es Antony y no está en modo invitado
+        if(sessionStorage.getItem('usuario') === 'Antony' && sessionStorage.getItem('guestMode') !== 'true') {
+            document.getElementById('uploadBtnLi').style.display = 'block';
+            document.getElementById('uploadBtn').addEventListener('click', function(e) {
+                const section = window.currentSection;
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/png, image/jpeg, video/mp4';
+                input.multiple = true;
+                input.onchange = e => {
+                    const files = Array.from(e.target.files);
+                    if (!files.length) return;
+                    files.forEach(file => {
+                        let type = file.type.startsWith('image') ? 'imagen' : (file.type.startsWith('video') ? 'video' : 'otro');
+                        if(type === 'otro') {
+                            alert('Solo se permiten imágenes PNG/JPEG o videos MP4.');
+                            return;
+                        }
+                        const titulo = prompt('Título para el archivo:');
+                        if(!titulo) return;
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            const galleryId = 'gallery-' + section;
+                            const gallery = document.getElementById(galleryId);
+                            let el = document.createElement('div');
+                            el.className = 'gallery-item';
+                            el.setAttribute('data-title', titulo);
+                            el.setAttribute('data-section', section);
+                            el.innerHTML = type === 'imagen'
+                                ? `<img src='${ev.target.result}' alt='${titulo}' style='max-width:100%; border-radius:8px;'/><div style='color:#6e48aa; font-weight:600; margin-top:0.5rem; text-align:center;'>${titulo}</div>`
+                                : `<video src='${ev.target.result}' controls style='max-width:100%; border-radius:8px;'></video><div style='color:#6e48aa; font-weight:600; margin-top:0.5rem; text-align:center;'>${titulo}</div>`;
+                            gallery.appendChild(el);
+                            // Auto-scroll
+                            gallery.scrollTop = gallery.scrollHeight;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                };
+                document.body.appendChild(input);
+                input.click();
+                document.body.removeChild(input);
+            });
+        } else {
+            document.getElementById('uploadBtnLi').style.display = 'none';
+        }
+            // Protección extra para invitados
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            document.addEventListener('copy', function(e) {
+                e.preventDefault();
+            });
+            document.addEventListener('keydown', function(e) {
+                // Bloquear Win+Shift+S, Win+G, PrintScreen y grabadores comunes
+                if ((e.key === 'PrintScreen') ||
+                    (e.ctrlKey && e.key.toLowerCase() === 'p') ||
+                    (e.key === 's' && e.shiftKey && e.metaKey) ||
+                    (e.key.toLowerCase() === 'g' && e.metaKey) ||
+                    (e.key.toLowerCase() === 's' && e.metaKey && e.shiftKey) ||
+                    (e.key.toLowerCase() === 'g' && e.metaKey) ||
+                    (e.key === 'F12') ||
+                    (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') ||
+                    (e.ctrlKey && e.key.toLowerCase() === 'u')) {
+                    e.preventDefault();
+                    alert('Función deshabilitada en modo invitado.');
+                }
+            });
+            // Intento de ocultar imágenes y videos
+            setTimeout(()=>{
+                document.querySelectorAll('img, video').forEach(el => {
+                    el.setAttribute('draggable', 'false');
+                    el.style.pointerEvents = 'none';
+                    el.style.userSelect = 'none';
+                });
+            }, 500);
+        
+        // Efectos hover y click para botones
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mouseover', function() {
+                this.classList.add('btn-hover');
+            });
+            btn.addEventListener('mouseout', function() {
+                this.classList.remove('btn-hover');
+            });
+            btn.addEventListener('mousedown', function() {
+                this.classList.add('btn-pressed');
+            });
+            btn.addEventListener('mouseup', function() {
+                this.classList.remove('btn-pressed');
+            });
+        });
+        // Funcionalidad del menú lateral
+        function toggleMenu(id) {
+            const menu = document.getElementById(id);
+            menu.classList.toggle('show');
+            // Expandir el menú si está contraído
+            const sidebar = document.getElementById('sidebar');
+            if(sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                document.getElementById('uploadBtnContainer').style.display = 'block';
+            }
+        }
+        document.getElementById('toggleBtn').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            const texts = document.querySelectorAll('.sidebar-text');
+            if(sidebar.classList.contains('collapsed')) {
+                texts.forEach(t => {
+                    t.style.opacity = '0';
+                    t.style.transform = 'scaleX(0.7)';
+                    t.style.transition = 'opacity 0.3s, transform 0.3s';
+                    setTimeout(()=>{ t.style.display = 'none'; }, 300);
+                });
+                sidebar.style.width = '70px';
+                document.querySelector('main').style.marginLeft = '70px';
+                Array.from(document.querySelectorAll('.sidebar i')).forEach(icon => { icon.style.margin = '0 auto'; icon.style.display = 'block'; });
+            } else {
+                texts.forEach(t => {
+                    t.style.display = '';
+                    setTimeout(()=>{
+                        t.style.opacity = '1';
+                        t.style.transform = 'scaleX(1)';
+                        t.style.transition = 'opacity 0.3s, transform 0.3s';
+                    }, 10);
+                });
+                sidebar.style.width = '';
+                document.querySelector('main').style.marginLeft = '';
+                Array.from(document.querySelectorAll('.sidebar i')).forEach(icon => { icon.style.margin = ''; icon.style.display = ''; });
+            }
+        });
+        // Protección contra descargas
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        // Protección contra copia
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+        });
+        
+        // --- Selección visual avanzada y acciones con persistencia en localStorage ---
+let lastSelectedIndex = null;
+function getCurrentGalleryItems() {
+    const gallery = document.getElementById('gallery-' + window.currentSection);
+    return Array.from(gallery.querySelectorAll('.gallery-item[data-visible="true"]'));
+}
+function updateSelectionUI() {
+    const items = getCurrentGalleryItems();
+    const selected = items.filter(item => item.classList.contains('selected'));
+    document.getElementById('deleteSelectedBtn').style.display = selected.length > 0 ? 'inline-block' : 'none';
+    document.getElementById('hideSelectedBtn').style.display = selected.length > 0 ? 'inline-block' : 'none';
+    document.getElementById('selectionInfo').textContent = selected.length > 0 ? `${selected.length} seleccionado(s)` : '';
+}
+function clearSelection() {
+    getCurrentGalleryItems().forEach(item => item.classList.remove('selected'));
+}
+// Click para seleccionar
+document.addEventListener('click', function(e) {
+    if(e.target.closest('.gallery-item')) {
+        const items = getCurrentGalleryItems();
+        const item = e.target.closest('.gallery-item');
+        const index = items.indexOf(item);
+        if(e.shiftKey && lastSelectedIndex !== null) {
+            const start = Math.min(lastSelectedIndex, index);
+            const end = Math.max(lastSelectedIndex, index);
+            for(let i=start; i<=end; i++) items[i].classList.add('selected');
+        } else if(e.ctrlKey || e.metaKey) {
+            // Ctrl+click: alterna selección
+            item.classList.toggle('selected');
+            lastSelectedIndex = index;
+        } else {
+            // Si ya está seleccionado y no hay shift/ctrl, deselecciona
+            if(item.classList.contains('selected') && getCurrentGalleryItems().filter(i => i.classList.contains('selected')).length === 1) {
+                item.classList.remove('selected');
+                lastSelectedIndex = null;
+            } else {
+                clearSelection();
+                item.classList.add('selected');
+                lastSelectedIndex = index;
+            }
+        }
+        updateSelectionUI();
+    } else if(!e.target.closest('.gallery')) {
+        clearSelection();
+        updateSelectionUI();
+    }
+});
+// Ctrl+A para seleccionar todos
+document.addEventListener('keydown', function(e) {
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+        const items = getCurrentGalleryItems();
+        items.forEach(item => item.classList.add('selected'));
+        updateSelectionUI();
+        e.preventDefault();
+    }
+});
+// Borrar seleccionados
+const deleteBtn = document.getElementById('deleteSelectedBtn');
+if(deleteBtn) deleteBtn.onclick = function() {
+    getCurrentGalleryItems().filter(item => item.classList.contains('selected')).forEach(item => item.remove());
+    updateSelectionUI();
+};
+// Ocultar para invitados (persistente en localStorage)
+function getHiddenItems() {
+    return JSON.parse(localStorage.getItem('hiddenGalleryItems') || '{}');
+}
+function setHiddenItems(obj) {
+    localStorage.setItem('hiddenGalleryItems', JSON.stringify(obj));
+}
+function getItemKey(item) {
+    // Un identificador único por sección y título
+    return `${item.getAttribute('data-section')}::${item.getAttribute('data-title')}`;
+}
+const hideBtn = document.getElementById('hideSelectedBtn');
+if(hideBtn) hideBtn.onclick = function() {
+    let hidden = getHiddenItems();
+    getCurrentGalleryItems().filter(item => item.classList.contains('selected')).forEach(item => {
+        item.setAttribute('data-visible', 'false');
+        item.style.display = 'none';
+        hidden[getItemKey(item)] = true;
+    });
+    setHiddenItems(hidden);
+    updateSelectionUI();
+};
+// Al cargar, ocultar los que están en localStorage si es invitado
+function applyHiddenForGuest() {
+    if(sessionStorage.getItem('usuario') !== 'Antony') {
+        let hidden = getHiddenItems();
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            if(hidden[getItemKey(item)]) {
+                item.setAttribute('data-visible', 'false');
+                item.style.display = 'none';
+            }
+        });
+    }
+}
+window.addEventListener('DOMContentLoaded', applyHiddenForGuest);
+// Estilo visual para selección
+const style = document.createElement('style');
+style.textContent = `.gallery-item.selected { outline: 3px solid #9d50bb; box-shadow: 0 0 0 4px #e0c6f7; }`;
+document.head.appendChild(style);
+// Botón para mostrar/recuperar archivos ocultos (solo Antony)
+if(sessionStorage.getItem('usuario') === 'Antony') {
+    const showHiddenBtn = document.createElement('button');
+    showHiddenBtn.id = 'showHiddenBtn';
+    showHiddenBtn.textContent = 'Mostrar ocultos';
+    showHiddenBtn.style = 'background:#6e48aa; color:white; border:none; border-radius:6px; padding:0.5rem 1rem; font-size:1rem; cursor:pointer; margin-left:0.5rem;';
+    const controlsDiv = document.querySelector('main > div');
+    controlsDiv.insertBefore(showHiddenBtn, controlsDiv.children[1]);
+    showHiddenBtn.onclick = function() {
+        let hidden = getHiddenItems();
+        let restored = 0;
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const key = getItemKey(item);
+            if(hidden[key]) {
+                item.setAttribute('data-visible', 'true');
+                item.style.display = '';
+                delete hidden[key];
+                restored++;
+            }
+        });
+        setHiddenItems(hidden);
+        updateSelectionUI();
+        if(restored === 0) alert('No hay archivos ocultos en esta sección.');
+    };
+}
+    </script>
 </body>
 </html>

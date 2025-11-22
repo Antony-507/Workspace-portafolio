@@ -3,11 +3,17 @@ const auth = {
     isAuthenticated: false,
     
     login(username, password) {
-        // Autenticación para Antony
-        if((username === 'Antony' && password === '507') || (username === 'admin' && password === 'admin123')) {
+        // Autenticación básica local (solo para la demo cliente)
+        if ((username === 'Antony' && password === '507') || (username === 'admin' && password === 'admin123')) {
             this.isAuthenticated = true;
             // Guardar usuario en sessionStorage
             sessionStorage.setItem('usuario', username);
+            // Asignar rol Manager a 'Antony' o a 'admin' en demo local
+            if (username === 'Antony' || username === 'admin') {
+                sessionStorage.setItem('role', 'Manager');
+            } else {
+                sessionStorage.setItem('role', 'Visitor');
+            }
             return true;
         }
         return false;
@@ -18,7 +24,11 @@ const auth = {
     },
     
     checkAuth() {
-        return this.isAuthenticated;
+        // También validar sessionStorage para persistencia entre páginas
+        if (this.isAuthenticated) return true;
+        const u = sessionStorage.getItem('usuario');
+        if (u) { this.isAuthenticated = true; return true; }
+        return false;
     }
 };
 

@@ -14,6 +14,16 @@
         .input-with-icon{position:relative;margin-bottom:1rem}
         .input-with-icon .icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:10px;background:#6e48aa;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
         .input-with-icon input{width:100%;padding:0.9rem 1rem 0.9rem 64px;border:1px solid #eee;border-radius:8px;font-size:1rem}
+        /* Evitar icono de autofill en Chrome/Edge */
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+            box-shadow: 0 0 0px 1000px white inset !important;
+            background-image: none !important;
+            background-color: white !important;
+            color: inherit !important;
+        }
+        /* Por defecto ocultar el botón de panel admin */
+        #adminPanelBtn { display: none; }
         button{width:100%;padding:0.85rem;background:linear-gradient(135deg,#6e48aa,#9d50bb);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600}
         .small-btns{display:flex;gap:0.6rem;margin-top:0.75rem}
         .small-btns button{width:unset;flex:1;padding:0.6rem}
@@ -24,12 +34,12 @@
         <h2>Iniciar Sesión</h2>
         <form id="loginForm">
             <div class="input-with-icon">
-                <span class="icon"><i class="fas fa-user"></i></span>
-                <input type="text" id="username" placeholder="Usuario" required>
+                <i class="input-icon fas fa-user" aria-hidden="true"></i>
+                <input type="text" id="username" placeholder="Usuario" required autocomplete="username">
             </div>
             <div class="input-with-icon">
-                <span class="icon"><i class="fas fa-lock"></i></span>
-                <input type="password" id="password" placeholder="Contraseña" required>
+                <i class="input-icon fas fa-lock" aria-hidden="true"></i>
+                <input type="password" id="password" placeholder="Contraseña" required autocomplete="current-password">
             </div>
             <button type="submit">Ingresar</button>
             <div class="small-btns">
@@ -52,7 +62,26 @@
             } else { alert('Usuario o contraseña incorrectos') }
         });
         document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='main.html' });
-        document.getElementById('adminPanelBtn').addEventListener('click', function(){ window.location.href='admin.html' });
+        function updateAdminBtnVisibility() {
+            const btn = document.getElementById('adminPanelBtn');
+            const role = sessionStorage.getItem('role');
+            const usuario = sessionStorage.getItem('usuario');
+            if (role === 'Manager' || usuario === 'Antony') {
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+        updateAdminBtnVisibility();
+        document.getElementById('adminPanelBtn').addEventListener('click', function(){
+            const role = sessionStorage.getItem('role');
+            const usuario = sessionStorage.getItem('usuario');
+            if (role === 'Manager' || usuario === 'Antony') {
+                window.location.href = 'admin.html';
+            } else {
+                alert('No tienes permisos para acceder al panel de administración');
+            }
+        });
     </script>
 </body>
 </html>

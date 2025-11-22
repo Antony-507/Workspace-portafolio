@@ -234,3 +234,61 @@ WHERE Email = '<EMAIL>'
 Después del reset: cambia la contraseña desde la UI del admin o elimina el script del repo si no quieres mantener herramientas de modificación de credenciales en el árbol principal.
  
 NOTA: La contraseña del usuario con email `amirandreve507@gmail.com` fue actualizada localmente por el propietario (por procedimiento manual en SSMS). Si fuiste tú, confirma que puedes iniciar sesión y después considera eliminar `reset-password-mssql.js` del repositorio o moverlo a un repositorio privado.
+
+---
+
+Conexión a LocalDB desde Node (Windows)
+
+Si estás usando `(localdb)\\MSSQLLocalDB` con Autenticación de Windows y el servidor muestra errores como `ENOTFOUND (localdb)`, sigue estos pasos rápidos:
+
+1) Instala el driver nativo `msnodesqlv8` en `backend`:
+
+```powershell
+cd 'C:\Users\amira\Documents\Aplicaciones\Sitio web portafolio\backend'
+npm install msnodesqlv8 --save
+```
+
+2) Exporta la cadena y arranca el servidor (ejemplo):
+
+```powershell
+$env:DB_TYPE='mssql'
+$env:MSSQL_CONN='Server=(localdb)\\MSSQLLocalDB;Database=PortafolioDB;Trusted_Connection=True;'
+$env:JWT_SECRET='un_secreto_para_pruebas'
+node .\server.js
+```
+
+El servidor intentará primero la conexión TCP y, si detecta una referencia a LocalDB o falla la resolución de nombre, intentará automáticamente usar `msnodesqlv8` (si está instalado). Si ves errores relacionados con msnodesqlv8, revisa la salida; puede que necesites Visual C++ Redistributable o permisos de Windows para el driver nativo.
+
+Si prefieres evitar drivers nativos, otra opción es usar una instancia SQL Server que acepte conexiones TCP (por ejemplo habilitar SQL Auth en tu instancia o usar una instancia `localhost` que escuche en TCP) y configurar `MSSQL_CONN` con `User Id`/`Password`.
+
+---
+
+## Recomendación práctica: usar SQL Server (TCP) + SQL Auth (evita msnodesqlv8)
+
+Si quieres evitar las dependencias nativas de `msnodesqlv8` y problemas con LocalDB/named-pipes, lo más práctico es:
+
+1. Instalar **SQL Server Express** o Developer edition localmente (soporta TCP y SQL Auth).
+2. Mover/adjuntar tu base `PortafolioDB` a esa instancia (puedes hacer backup/restore desde LocalDB usando SSMS).
+3. Crear un login SQL y usuario para la app (ejemplo abajo).
+4. Establecer `MSSQL_CONN` con una cadena TCP como `Server=localhost;Database=PortafolioDB;User Id=appuser;Password=MiPassSegura;TrustServerCertificate=True;` y arrancar el backend.
+
+Ejemplo T-SQL para crear login + usuario (ejecutar en SSMS conectado a la instancia TCP):
+
+```sql
+CREATE LOGIN appuser WITH PASSWORD = 'P@ssw0rd!123';
+USE PortafolioDB;
+CREATE USER appuser FOR LOGIN appuser;
+ALTER ROLE db_owner ADD MEMBER appuser; -- para pruebas; en producción reducir permisos
+```
+
+Ejemplo: arrancar backend con la cadena TCP en PowerShell (temporal para la sesión):
+
+```powershell
+Push-Location 'C:\Users\amira\Documents\Aplicaciones\Sitio web portafolio\backend'
+$env:MSSQL_CONN = 'Server=localhost;Database=PortafolioDB;User Id=appuser;Password=P@ssw0rd!123;TrustServerCertificate=True;'
+node .\server.js
+Pop-Location
+```
+
+Si quieres, hay un script práctico `run-with-tcp.ps1` en este directorio que te permite pasar la cadena de conexión y arranca el servidor guardando logs.
+

@@ -95,24 +95,41 @@
             } else { alert('Usuario o contraseña incorrectos') }
         });
         document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='main.html' });
-        // Mostrar u ocultar el botón de panel admin según role en sessionStorage
-        function updateAdminBtnVisibility() {
+        // Mostrar u ocultar el botón de panel admin sólo si: (a) role === 'Manager' y (b) la IP está autorizada
+        async function updateAdminBtnVisibility() {
             const btn = document.getElementById('adminPanelBtn');
             const role = sessionStorage.getItem('role');
             const usuario = sessionStorage.getItem('usuario');
-            if (role === 'Manager' || usuario === 'Antony') {
-                btn.style.display = '';
-            } else {
+            // si no hay role o no es Manager, ocultar rápido
+            if (role !== 'Manager' && usuario !== 'Antony') { btn.style.display = 'none'; return; }
+            try {
+                const resp = await fetch('/admin/check-ip', { method: 'GET', cache: 'no-store' });
+                if (!resp.ok) { btn.style.display = 'none'; return; }
+                const j = await resp.json();
+                if (j && j.allowed === true) {
+                    btn.style.display = '';
+                } else {
+                    btn.style.display = 'none';
+                }
+            } catch (e) {
+                console.warn('No se pudo comprobar ADMIN IP:', e);
                 btn.style.display = 'none';
             }
         }
+        // Llamada inicial y cada vez que la página gane foco (por si cambia la IP)
         updateAdminBtnVisibility();
-        // Si el usuario pulsa el botón, validar antes de redirigir
+        window.addEventListener('focus', updateAdminBtnVisibility);
+
+        // Si el usuario pulsa el botón, validar antes de redirigir (se asume que ya se hizo la comprobación)
         document.getElementById('adminPanelBtn').addEventListener('click', function(){
             const role = sessionStorage.getItem('role');
             const usuario = sessionStorage.getItem('usuario');
             if (role === 'Manager' || usuario === 'Antony') {
-                window.location.href = 'admin.html';
+                // re-check ip synchronously before redirecting
+                fetch('/admin/check-ip', { method: 'GET', cache: 'no-store' }).then(r => r.json()).then(j => {
+                    if (j && j.allowed === true) window.location.href = 'admin.html';
+                    else alert('Acceso restringido desde esta ubicación');
+                }).catch(()=> alert('No se pudo verificar permisos, inténtalo de nuevo'));
             } else {
                 alert('No tienes permisos para acceder al panel de administración');
             }

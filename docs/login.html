@@ -44,8 +44,8 @@
                 background-position: left center;
             }
 
-            /* Por defecto ocultar el botón de panel admin en el cliente; se muestra solo si hay rol Manager */
-            #adminPanelBtn { display: none; }
+            /* El botón de panel admin es visible para todos; validamos al hacer clic */
+            #adminPanelBtn { display: inline-block; }
 
             /* Evitar el icono morado / background que Chrome/Edge añade por autofill */
             input:-webkit-autofill,
@@ -114,42 +114,18 @@
         });
         document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='main.html' });
         // Mostrar u ocultar el botón de panel admin sólo si: (a) role === 'Manager' y (b) la IP está autorizada
-        async function updateAdminBtnVisibility() {
-            const btn = document.getElementById('adminPanelBtn');
-            try {
-                const headers = {}; const token = sessionStorage.getItem('token'); if (token) headers['Authorization'] = 'Bearer ' + token;
-                const r = await fetch(apiBase()+'/admin/check-ip', { method: 'GET', cache: 'no-store', headers });
-                const ct = r.headers.get('content-type')||''; const j = ct.includes('application/json') ? await r.json() : null;
-                btn.style.display = j && j.allowedDisplay === true ? '' : 'none';
-            } catch (e) {
-                btn.style.display = 'none';
-            }
-        }
-        // Llamada inicial y cada vez que la página gane foco (por si cambia la IP)
-        updateAdminBtnVisibility();
-        window.addEventListener('focus', updateAdminBtnVisibility);
+        // El botón se queda visible; la validación se hará al hacer clic
 
         // Si el usuario pulsa el botón, validar antes de redirigir (se asume que ya se hizo la comprobación)
         document.getElementById('adminPanelBtn').addEventListener('click', function(){
-            const role = sessionStorage.getItem('role');
-            const usuario = sessionStorage.getItem('usuario');
-            fetch(apiBase()+'/admin/check-ip', { method: 'GET', cache: 'no-store' }).then(r => r.json()).then(j => {
-                if (role === 'Manager' && j && j.allowed === true) {
-                  window.location.href = 'admin.html';
-                } else if (j && j.allowedDisplay === true && (role === 'Manager' && usuario === 'Antony')) {
-                  // mostrar pero alertar si no pasa la validación estricta
-                  alert('Tu IP está permitida, pero necesitas sesión Manager para administrar.');
-                } else {
-                  alert('Acceso restringido desde esta ubicación');
-                }
-            }).catch(()=> alert('No se pudo verificar permisos, inténtalo de nuevo'));
+            fetch(apiBase()+'/admin/check-ip', { method: 'GET', cache: 'no-store' })
+              .then(r => r.json())
+              .then(j => { if (j && j.allowed === true) { window.location.href = 'admin.html'; } else { alert('No tienes permisos desde esta IP para acceder al panel de administración'); } })
+              .catch(()=> alert('No se pudo verificar permisos, inténtalo de nuevo'));
         });
 
         // Configurar API manualmente
-        const cfgBtn = document.createElement('button'); cfgBtn.textContent = 'Configurar API'; cfgBtn.style.marginTop = '8px'; cfgBtn.type = 'button';
-        cfgBtn.addEventListener('click', ()=>{ const v = prompt('API_BASE (ej: http://localhost:3001 o https://tu-backend)', localStorage.getItem('api_base') || apiBase()); if(v!=null){ localStorage.setItem('api_base', v.trim()); alert('API_BASE guardado: '+v.trim()); } });
-        const info = document.createElement('div'); info.style.marginTop='6px'; info.style.fontSize='0.85rem'; info.style.color='#6e48aa'; info.textContent = 'API_BASE: '+(localStorage.getItem('api_base')||apiBase()); document.querySelector('.login-container').appendChild(info);
-        document.querySelector('.small-btns').appendChild(cfgBtn);
+        // Ocultar configuración de API en la UI para simplificar
     </script>
 </body>
 </html>

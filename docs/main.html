@@ -87,51 +87,30 @@
                 showSection(this.id.replace('menu','').toLowerCase());
             };
         });
-        // Mostrar botón de subida solo si el usuario es Antony y no está en modo invitado
-        if(sessionStorage.getItem('usuario') === 'Antony' && sessionStorage.getItem('guestMode') !== 'true') {
+        // Subida real: requiere token y rol
+        const token = sessionStorage.getItem('token');
+        const role = sessionStorage.getItem('role');
+        if(role === 'Manager' && sessionStorage.getItem('guestMode') !== 'true') {
             document.getElementById('uploadBtnLi').style.display = 'block';
-            document.getElementById('uploadBtn').addEventListener('click', function(e) {
-                const section = window.currentSection;
+            document.getElementById('uploadBtn').addEventListener('click', function() {
                 const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/png, image/jpeg, video/mp4';
-                input.multiple = true;
-                input.onchange = e => {
-                    const files = Array.from(e.target.files);
-                    if (!files.length) return;
-                    files.forEach(file => {
-                        let type = file.type.startsWith('image') ? 'imagen' : (file.type.startsWith('video') ? 'video' : 'otro');
-                        if(type === 'otro') {
-                            alert('Solo se permiten imágenes PNG/JPEG o videos MP4.');
-                            return;
-                        }
-                        const titulo = prompt('Título para el archivo:');
-                        if(!titulo) return;
-                        const reader = new FileReader();
-                        reader.onload = function(ev) {
-                            const galleryId = 'gallery-' + section;
-                            const gallery = document.getElementById(galleryId);
-                            let el = document.createElement('div');
-                            el.className = 'gallery-item';
-                            el.setAttribute('data-title', titulo);
-                            el.setAttribute('data-section', section);
-                            el.innerHTML = type === 'imagen'
-                                ? `<img src='${ev.target.result}' alt='${titulo}' style='max-width:100%; border-radius:8px;'/><div style='color:#6e48aa; font-weight:600; margin-top:0.5rem; text-align:center;'>${titulo}</div>`
-                                : `<video src='${ev.target.result}' controls style='max-width:100%; border-radius:8px;'></video><div style='color:#6e48aa; font-weight:600; margin-top:0.5rem; text-align:center;'>${titulo}</div>`;
-                            gallery.appendChild(el);
-                            // Auto-scroll
-                            gallery.scrollTop = gallery.scrollHeight;
-                        };
-                        reader.readAsDataURL(file);
-                    });
+                input.type = 'file'; input.accept = 'image/png, image/jpeg, video/mp4'; input.multiple = true;
+                input.onchange = async e => {
+                    const files = Array.from(e.target.files); if (!files.length) return;
+                    for (const file of files) {
+                        if(!(file.type.startsWith('image') || file.type.startsWith('video'))) { alert('Solo PNG/JPEG o MP4'); continue; }
+                        const fd = new FormData(); fd.append('file', file);
+                        try{
+                          const resp = await fetch('/api/upload', { method:'POST', headers: token ? { 'Authorization':'Bearer '+token } : {}, body: fd });
+                          const j = await resp.json(); if(!resp.ok){ alert(j.error||'Fallo al subir'); continue; }
+                          appendToGallery(j.url);
+                        }catch(err){ alert('Error de red: '+err.message); }
+                    }
+                    await loadFiles();
                 };
-                document.body.appendChild(input);
                 input.click();
-                document.body.removeChild(input);
             });
-        } else {
-            document.getElementById('uploadBtnLi').style.display = 'none';
-        }
+        } else { document.getElementById('uploadBtnLi').style.display = 'none'; }
             // Protección extra para invitados
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
@@ -155,13 +134,7 @@
                 }
             });
             // Intento de ocultar imágenes y videos
-            setTimeout(()=>{
-                document.querySelectorAll('img, video').forEach(el => {
-                    el.setAttribute('draggable', 'false');
-                    el.style.pointerEvents = 'none';
-                    el.style.userSelect = 'none';
-                });
-            }, 500);
+            setTimeout(()=>{ document.querySelectorAll('img, video').forEach(el => { el.setAttribute('draggable','false'); }); }, 500);
         
         // Efectos hover y click para botones
         document.querySelectorAll('button').forEach(btn => {
@@ -179,6 +152,24 @@
             });
         });
         fetch('/api/my-ip').then(r=>r.json()).then(j=>{ const el=document.getElementById('ipInfo'); if(el) el.textContent = 'Tu IP: ' + (j && j.ip ? j.ip : 'desconocida'); }).catch(()=>{});
+        // Funciones de galería real
+        function appendToGallery(url){
+          const section = window.currentSection;
+          const gallery = document.getElementById('gallery-'+section);
+          const isImg = /\.(png|jpg|jpeg|gif|webp)$/i.test(url);
+          const el = document.createElement('div'); el.className='gallery-item';
+          el.innerHTML = isImg ? `<img src='${url}' alt='' style='max-width:100%; border-radius:8px;'/>` : `<video src='${url}' controls style='max-width:100%; border-radius:8px;'></video>`;
+          gallery.appendChild(el);
+        }
+        async function loadFiles(){
+          try{
+            const resp = await fetch('/api/files'); const files = await resp.json();
+            ['disenos','juegos','desarrollos','educacion','personales'].forEach(s=>{ const g=document.getElementById('gallery-'+s); if(g) g.innerHTML=''; });
+            files.forEach(f=>{ appendToGallery(f.Url || f.url); });
+          }catch(e){}
+        }
+        loadFiles();
+
         // Funcionalidad del menú lateral
         function toggleMenu(id) {
             const menu = document.getElementById(id);

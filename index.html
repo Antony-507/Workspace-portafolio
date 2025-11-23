@@ -79,7 +79,8 @@
             ¡Bienvenido/a al portafolio virtual de Antony! Explora las secciones del menú para ver fotos y videos.
         </div>
         <div id="sidebarFooter" class="sidebar-text" style="background:#fff; color:#6e48aa; text-align:center; padding:1rem; font-size:1rem; margin:0.5rem 1rem 1.5rem 1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.07); border-top:1px solid #eee;">
-            &copy; 2025 Antony  <a href="https://www.instagram.com/507antony507/" target="_blank" id="instaLink" style="color:#9d50bb; text-decoration:none; font-weight:600; transition:color 0.2s;">507antony507</a>
+            &copy; 2025 @By Antony  <a href="https://x.com/Dragoncraft507" target="_blank" id="instaLink" style="color:#9d50bb; text-decoration:none; font-weight:600; transition:color 0.2s;">Dragoncraft507</a>
+            <div id="ipInfoIndex" style="margin-top:6px;font-size:0.9rem;color:#6e48aa"></div>
         </div>
     </aside>
     <main>
@@ -105,6 +106,7 @@
                 window.location.href = 'login.html';
             }, 180);
         });
+        fetch('/api/my-ip').then(r=>r.json()).then(j=>{ const el=document.getElementById('ipInfoIndex'); if(el) el.textContent = 'Tu IP: ' + (j && j.ip ? j.ip : 'desconocida'); }).catch(()=>{});
         // Navegación de secciones
         window.currentSection = 'disenos';
         function showSection(section) {

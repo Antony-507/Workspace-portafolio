@@ -65,16 +65,14 @@
                         }
                     }
                     obtenerIPyGuardar();
+                    function apiBase(){ return localStorage.getItem('api_base') || (location.hostname.endsWith('github.io') ? '' : ''); }
+                    async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ return { resp, json: await resp.json() }; } const t = await resp.text(); throw new Error('Respuesta no JSON desde '+url+': '+t.slice(0,80)); }
             
                     // Manejo del formulario: intentar login en el backend (/api/login)
                     async function serverLogin(identifier, password) {
                         try {
-                            const resp = await fetch('/api/login', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(identifier.includes('@') ? { email: identifier, password } : { username: identifier, password })
-                            });
-                            const json = await resp.json().catch(()=>null);
+                            const payload = identifier.includes('@') ? { email: identifier, password } : { username: identifier, password };
+                            const { resp, json } = await fetchJson('/api/login', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
                             if (!resp.ok) {
                                 const msg = (json && json.error) ? json.error : 'Login fallido';
                                 alert(msg);
@@ -83,13 +81,13 @@
                             // Guardar token y role en sessionStorage para la UI
                             if (json && json.token) sessionStorage.setItem('token', json.token);
                             if (json && json.user && json.user.role) sessionStorage.setItem('role', json.user.role);
-                            if (json && json.user && (json.user.email || json.user.Email)) sessionStorage.setItem('usuario', json.user.email || json.user.Email);
+                            if (json && json.user) sessionStorage.setItem('usuario', json.user.nombre || json.user.email || json.user.Email || '');
                             // Redirigir al index principal
                             window.location.href = 'index.html';
                             return true;
                         } catch (e) {
                             console.error('Login error', e);
-                            alert('Error comunicándose con el servidor');
+                            alert('Error comunicándose con el servidor: '+e.message);
                             return false;
                         }
                     }

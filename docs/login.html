@@ -47,6 +47,7 @@
                         <div class="row">
                             <button type="button" id="guestBtn" class="small-btn" style="background:#eee;">Modo Invitado</button>
                             <button type="button" id="adminPanelBtn" class="small-btn" style="background:#444; color:white;">Panel de administración</button>
+                            <button type="button" id="apiConfigBtn" class="small-btn" style="background:#eee;">Configurar API</button>
                         </div>
                     </form>
                 </div>
@@ -65,6 +66,9 @@
                         }
                     }
                     obtenerIPyGuardar();
+                    function apiBase(){ return localStorage.getItem('api_base') || (location.hostname.endsWith('github.io') ? '' : ''); }
+                    function setApiBase(v){ if(v){ localStorage.setItem('api_base', v); } else { localStorage.removeItem('api_base'); } }
+                    async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ return { resp, json: await resp.json() }; } const t = await resp.text(); throw new Error('Respuesta no JSON desde '+url+': '+t.slice(0,120)); }
                     function apiBase(){ return localStorage.getItem('api_base') || (location.hostname.endsWith('github.io') ? '' : ''); }
                     async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ return { resp, json: await resp.json() }; } const t = await resp.text(); throw new Error('Respuesta no JSON desde '+url+': '+t.slice(0,80)); }
             
@@ -138,6 +142,18 @@
                             window.location.href = 'admin.html';
                         } else {
                             alert('No tienes permisos para acceder al panel de administración');
+                        }
+                    });
+
+                    document.getElementById('apiConfigBtn').addEventListener('click', async function(){
+                        const current = apiBase() || '(no definida)';
+                        const v = prompt('API Base (ejemplo: https://tu-backend-publico)\nActual: '+current+'\nDeja vacío para borrar configuración:', current==='(no definida)'?'':current);
+                        if(v===null) return;
+                        const trimmed = (v||'').trim(); setApiBase(trimmed);
+                        if(trimmed){
+                            alert('API configurada en: '+trimmed+'\nAhora el login usará '+trimmed+'/api/login');
+                        } else {
+                            alert('Configuración de API eliminada. Si estás en GitHub Pages, el login usará fallback local.');
                         }
                     });
                 </script>

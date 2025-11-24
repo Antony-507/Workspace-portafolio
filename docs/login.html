@@ -8,54 +8,22 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%239d50bb'/%3E%3Ctext x='50%' y='55%' text-anchor='middle' dominant-baseline='middle' font-size='40' font-family='Poppins, Arial, sans-serif' fill='white'%3EA%3C/text%3E%3C/svg%3E" type="image/svg+xml">
     <style>
-        body{font-family: 'Poppins', Arial, sans-serif; background: linear-gradient(180deg,#faf6ff,#fff); margin:0}
-            * { box-sizing: border-box; }
-            .login-container{max-width:420px;margin:5rem auto;padding:2.5rem;background:white;border-radius:16px;box-shadow:0 15px 30px rgba(0,0,0,0.12)}
-        .login-container h2{color:#6e48aa;text-align:center;margin-bottom:1rem}
-            .form-group { margin-bottom: 1rem; }
-            .form-group label { display:block; margin-bottom:0.5rem }
-
-            /* Contenedor para input con icono */
-            .input-with-icon { position: relative; }
-            .input-with-icon .input-icon {
-                position: absolute;
-                left: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 44px;
-                height: 44px;
-                border-radius: 10px;
-                background: #6e48aa;
-                color: #fff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                pointer-events: none; /* evita que el icono interfiera con clics */
-                z-index: 2;
-            }
-            .input-with-icon input {
-                width: 100%;
-                padding: 0.9rem 1rem 0.9rem 64px; /* espacio para el icono */
-                border: 1px solid #eee;
-                border-radius: 8px;
-                font-size: 1rem;
-                background-repeat: no-repeat;
-                background-position: left center;
-            }
-
-            /* Por defecto ocultar el botón de panel admin en el cliente; se muestra solo si hay rol Manager */
-            #adminPanelBtn { display: none; }
-
-            /* Evitar el icono morado / background que Chrome/Edge añade por autofill */
-                        input:-webkit-autofill,
-                        input:-webkit-autofill:hover,
-                        input:-webkit-autofill:focus,
-                        input:-webkit-autofill:active {
-                            -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-                            -webkit-text-fill-color: #000 !important;
-                        }
-                </style>
+        *{box-sizing:border-box}
+        @keyframes bgshift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        body{font-family:'Poppins',Arial,sans-serif;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f6f0ff,#ffffff);}
+        .login-container{position:relative;width:100%;max-width:520px;margin:4rem auto;padding:2.4rem;border-radius:18px;background:linear-gradient(#ffffff,#ffffff) padding-box,linear-gradient(135deg,#6e48aa,#9d50bb) border-box;border:1px solid transparent;box-shadow:0 20px 40px rgba(0,0,0,0.12);backdrop-filter:saturate(1.2) blur(4px)}
+        .login-header{display:flex;align-items:center;gap:0.9rem;margin-bottom:1rem}
+        .logo-circle{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#6e48aa,#9d50bb);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+        .hint{color:#7a5ab0;font-size:0.9rem;margin-top:-4px}
+        h2{color:#5b3ea6;margin:0}
+        .form-group{margin-bottom:1rem}
+        .form-group input{width:100%;padding:0.95rem 1rem;border:1px solid #e7e3f3;border-radius:10px;font-size:1rem;transition:border-color .2s,box-shadow .2s}
+        .form-group input:focus{outline:none;border-color:#9d50bb;box-shadow:0 0 0 3px rgba(157,80,187,.15)}
+        .small-btn{width:100%;padding:0.85rem;border:none;border-radius:10px;font-weight:600;cursor:pointer;transition:transform .08s ease,box-shadow .2s}
+        .small-btn:hover{transform:translateY(-1px);box-shadow:0 8px 16px rgba(0,0,0,.1)}
+        .row{display:flex;gap:.7rem}
+        #adminPanelBtn{background:#2f2d3a;color:#fff}
+    </style>
             
             </head>
             <body class="theme-original">

@@ -69,7 +69,7 @@
         <form id="loginForm">
             <div class="form-group input-with-icon">
                 <i class="input-icon fas fa-user" aria-hidden="true"></i>
-                <input type="text" id="username" class="form-control" required placeholder="Usuario" autocomplete="username">
+                <input type="text" id="identifier" class="form-control" required placeholder="Usuario o Email" autocomplete="username">
             </div>
             <div class="form-group input-with-icon">
                 <i class="input-icon fas fa-lock" aria-hidden="true"></i>
@@ -95,11 +95,12 @@
         }
         document.getElementById('loginForm').addEventListener('submit', async function(e){
             e.preventDefault();
-            const username = document.getElementById('username').value.trim();
+            const identifier = document.getElementById('identifier').value.trim();
             const password = document.getElementById('password').value.trim();
-            if(!username || !password){ alert('Completa ambos campos'); return }
+            if(!identifier || !password){ alert('Completa ambos campos'); return }
             try{
-              const { resp, json:j } = await fetchJson('/api/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
+              const payload = (identifier.includes('@')) ? { email: identifier, password } : { username: identifier, password };
+              const { resp, json:j } = await fetchJson('/api/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
               if(!resp.ok){ alert(j y j.error ? j.error : 'Usuario o contraseña incorrectos'); return; }
               sessionStorage.setItem('token', j.token);
               sessionStorage.setItem('usuario', j.user.nombre || j.user.email);

@@ -101,7 +101,7 @@
             try{
               const payload = (identifier.includes('@')) ? { email: identifier, password } : { username: identifier, password };
               const { resp, json:j } = await fetchJson('/api/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-              if(!resp.ok){ alert(j y j.error ? j.error : 'Usuario o contraseña incorrectos'); return; }
+              if(!resp.ok){ alert(j && j.error ? j.error : 'Usuario o contraseña incorrectos'); return; }
               sessionStorage.setItem('token', j.token);
               sessionStorage.setItem('usuario', j.user.nombre || j.user.email);
               sessionStorage.setItem('role', j.user.role);

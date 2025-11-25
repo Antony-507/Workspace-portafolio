@@ -90,7 +90,8 @@
         // Subida real: requiere token y rol
         const token = sessionStorage.getItem('token');
         const role = sessionStorage.getItem('role');
-        if(role === 'Manager' && sessionStorage.getItem('guestMode') !== 'true') {
+        const usuario = sessionStorage.getItem('usuario');
+        if((role === 'Manager' || usuario === 'Antony') && sessionStorage.getItem('guestMode') !== 'true') {
             document.getElementById('uploadBtnLi').style.display = 'block';
             document.getElementById('uploadBtn').addEventListener('click', function() {
                 const input = document.createElement('input');

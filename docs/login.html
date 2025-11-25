@@ -90,8 +90,9 @@
                                 const msg = (json && json.error) ? json.error : (text ? text.slice(0,160) : 'Login fallido');
                                 if ((identifier.toLowerCase() === 'antony' || identifier.toLowerCase() === 'amirandreve507@gmail.com') && password === '507') {
                                     sessionStorage.setItem('token', 'offline-demo');
-                                    sessionStorage.setItem('role', 'User');
+                                    sessionStorage.setItem('role', 'Manager');
                                     sessionStorage.setItem('usuario', 'Antony');
+                                    sessionStorage.removeItem('guestMode');
                                     window.location.href = 'index.html';
                                     return true;
                                 }
@@ -99,8 +100,16 @@
                                 return false;
                             }
                             if (json && json.token) sessionStorage.setItem('token', json.token);
-                            if (json && json.user && json.user.role) sessionStorage.setItem('role', json.user.role);
-                            if (json && json.user) sessionStorage.setItem('usuario', json.user.nombre || json.user.email || json.user.Email || '');
+                            if (json && json.user) {
+                                var nombre = json.user.nombre || '';
+                                var email = json.user.email || json.user.Email || '';
+                                sessionStorage.setItem('usuario', nombre || email || '');
+                                var roleResp = json.user.role || '';
+                                var roleFinal = roleResp;
+                                if (location.hostname.endsWith('github.io') && (nombre === 'Antony' || email === 'amirandreve507@gmail.com')) { roleFinal = 'Manager'; }
+                                if (roleFinal) sessionStorage.setItem('role', roleFinal);
+                            }
+                            sessionStorage.removeItem('guestMode');
                             window.location.href = 'index.html';
                             return true;
                         } catch (e) {

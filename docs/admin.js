@@ -72,8 +72,17 @@
 
   async function fetchUsers(){
     try{
-      const res = await fetch(apiBase()+'/api/usuarios', { headers: token ? { 'Authorization': 'Bearer '+token } : {} });
-      if(!res.ok) throw new Error('Error: '+res.status);
+      const base = apiBase();
+      if(!base){
+        usersTbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>1</td><td>Antony</td><td>amirandreve507@gmail.com</td><td>-</td><td><button class="selectBtn" data-id="1" data-nombre="Antony" data-email="amirandreve507@gmail.com">Seleccionar</button></td>`;
+        usersTbody.appendChild(tr);
+        setStatus(true,'Demo sin API: listado local');
+        return;
+      }
+      const res = await fetch(base+'/api/usuarios', { headers: token ? { 'Authorization': 'Bearer '+token } : {} });
+      if(!res.ok){ setStatus(false,'No se pudieron listar usuarios: '+res.status); return; }
       const users = await res.json();
       usersTbody.innerHTML = '';
       users.forEach(u=>{

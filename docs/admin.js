@@ -444,7 +444,7 @@
   // Files list management
   async function loadFiles() {
     try{
-      const res = await fetch(apiBase()+'/admin/files', { headers: token ? { 'Authorization': 'Bearer '+token } : {} });
+      const res = await fetch(apiBase()+'/api/files', { headers: token ? { 'Authorization': 'Bearer '+token } : {} });
       if(!res.ok) { filesTableBody.innerHTML = ''; return; }
       const files = await res.json();
       filesTableBody.innerHTML = '';
@@ -470,9 +470,8 @@
     const id = btn.dataset.id;
     if(!confirm('¿Eliminar archivo id '+id+'?')) return;
     try{
-      const res = await fetch(apiBase()+'/admin/delete-file', { method:'POST', headers: {'Content-Type':'application/json', 'Authorization': token ? 'Bearer '+token : '' }, body: JSON.stringify({ fileId: parseInt(id,10) }) });
-      const data = await res.json();
-      if(!res.ok) { cfgOutput.textContent = 'Error borrando archivo: '+(data.error||res.status); return; }
+      const res = await fetch(apiBase()+'/api/files/'+parseInt(id,10), { method:'DELETE', headers: { 'Authorization': token ? 'Bearer '+token : '' } });
+      if(!res.ok) { try{ const data = await res.json(); cfgOutput.textContent = 'Error borrando archivo: '+(data.error||res.status); }catch{ cfgOutput.textContent = 'Error borrando archivo: '+res.status; } return; }
       cfgOutput.textContent = 'Archivo eliminado';
       loadFiles();
     }catch(e){ cfgOutput.textContent = 'Error borrando archivo: '+e.message; }

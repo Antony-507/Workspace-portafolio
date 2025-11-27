@@ -1,26 +1,7 @@
 const auth = {
   isAuthenticated: false,
-  login(username, password) {
-    if ((username === 'Antony' && password === '507') || (username === 'admin' && password === 'admin123')) {
-      this.isAuthenticated = true;
-      sessionStorage.setItem('usuario', username);
-      sessionStorage.setItem('role', (username === 'Antony' || username === 'admin') ? 'Manager' : 'Visitor');
-      return true;
-    }
-    return false;
-  },
-  logout() {
-    this.isAuthenticated = false;
-    sessionStorage.removeItem('usuario');
-    sessionStorage.removeItem('role');
-    sessionStorage.removeItem('guestMode');
-  },
-  checkAuth() {
-    if (this.isAuthenticated) return true;
-    const u = sessionStorage.getItem('usuario');
-    if (u) { this.isAuthenticated = true; return true; }
-    return false;
-  }
+  logout() { this.isAuthenticated = false; sessionStorage.removeItem('usuario'); sessionStorage.removeItem('role'); sessionStorage.removeItem('guestMode'); sessionStorage.removeItem('token'); },
+  checkAuth() { const t = sessionStorage.getItem('token'); const g = sessionStorage.getItem('guestMode')==='true'; if(t || g){ this.isAuthenticated = true; return true; } return false; }
 };
 
 function protectContent() {

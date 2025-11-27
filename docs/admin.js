@@ -107,14 +107,7 @@
 
   async function fetchUsers(){
     try{
-      if(token === 'offline-demo'){
-        usersTbody.innerHTML = '';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>1</td><td>Antony</td><td>amirandreve507@gmail.com</td><td>Manager</td><td>(hash)</td><td>-</td><td><button class="selectBtn" data-id="1" data-nombre="Antony" data-email="amirandreve507@gmail.com">Seleccionar</button></td>`;
-        usersTbody.appendChild(tr);
-        setStatus(true,'Demo local: usuarios');
-        return;
-      }
+      
       const base = apiBase();
       const endpoints = ['/api/usuarios','/api/users','/usuarios','/users'];
       let users = null, lastStatus = 0;
@@ -158,12 +151,10 @@
         token = json && json.token ? json.token : null;
         const usuarioNombre = json && json.user && (json.user.nombre || json.user.email || json.user.Email) || '';
         userRole = json && json.user && json.user.role || '';
-        if(location.hostname.endsWith('github.io') && (usuarioNombre === 'Antony' || usuarioNombre === 'amirandreve507@gmail.com')) userRole = 'Manager';
         sessionStorage.setItem('token', token || ''); sessionStorage.setItem('role', userRole || ''); sessionStorage.setItem('usuario', usuarioNombre || ''); sessionStorage.removeItem('guestMode');
         logoutBtn.style.display='inline-block';
         setStatus(true,'Autenticado como '+usuarioNombre+' ('+(userRole||'')+')');
       }
-      isAdminRemote = location.hostname.endsWith('github.io') ? true : isAdminRemote;
       if (userRole === 'Manager') {
         showAdminSections(true);
         fetchUsers();

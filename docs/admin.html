@@ -19,6 +19,9 @@
     .small{padding:.5rem .8rem;border:none;border-radius:8px;background:#eee}
     table{width:100%;border-collapse:collapse;margin-top:.6rem}
     th,td{padding:.5rem;border-bottom:1px solid #eee}
+    #status.err{color:#a33}
+    #status.ok{color:#2b8a3e}
+    .section-title{display:flex;align-items:center;gap:.5rem;color:#5b3ea6}
   </style>
 </head>
 <body>
@@ -44,7 +47,7 @@
 
     <section id="main" style="display:none">
       <div style="display:flex; gap:12px; align-items:center; justify-content:space-between;">
-        <h2>Usuarios</h2>
+        <h2 class="section-title"><i class="fa-solid fa-users"></i> Usuarios</h2>
         <div style="margin-left:auto">
           <button id="btnAgregar" class="small">Agregar</button>
           <button id="btnModificar" class="small">Modificar</button>
@@ -99,7 +102,7 @@
 
       <div style="margin-top:14px;color:#666;font-size:0.95rem;">Nota: las acciones de administración requieren que la petición provenga de la IP configurada como `ADMIN_IP` en el servidor.</div>
       <section id="configSection" style="margin-top:18px;border-top:1px solid #eee;padding-top:12px;">
-        <h2>Configuración del servidor</h2>
+        <h2 class="section-title"><i class="fa-solid fa-server"></i> Configuración del servidor</h2>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="text" id="cfg_dbServer" placeholder="DB Server (p.ej. (localdb)\\MSSQLLocalDB)" style="min-width:320px" />
           <input type="text" id="cfg_dbUser" placeholder="DB User (opcional)" />
@@ -129,13 +132,13 @@
       </section>
 
       <section id="filesSection" style="margin-top:18px; display:none;">
-        <h2>Archivos subidos</h2>
+        <h2 class="section-title"><i class="fa-solid fa-file"></i> Archivos subidos</h2>
         <div style="margin-bottom:8px;"><button id="refreshFiles">Refrescar lista de archivos</button></div>
         <table id="filesTable"><thead><tr><th>Id</th><th>FileName</th><th>UsuarioId</th><th>Storage</th><th>UploadedAt</th><th>Acciones</th></tr></thead><tbody></tbody></table>
       </section>
 
       <section id="sessionsSection" style="margin-top:18px; display:none;">
-        <h2>Sesiones iniciadas</h2>
+        <h2 class="section-title"><i class="fa-solid fa-user-clock"></i> Sesiones iniciadas</h2>
         <div style="margin-bottom:8px;"><button id="refreshSessions">Refrescar sesiones</button></div>
         <table id="sessionsTable"><thead><tr><th>UsuarioId</th><th>Rol</th><th>IP</th><th>Agente</th><th>Creada</th><th>Último uso</th></tr></thead><tbody></tbody></table>
       </section>

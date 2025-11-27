@@ -20,7 +20,17 @@
   let token = null;
   let isAdminRemote = false;
   let userRole = null;
-  function setStatus(ok, txt){ statusEl.textContent = txt; statusEl.className = ok ? 'ok' : 'err'; }
+  function setStatus(ok, txt){
+    statusEl.className = ok ? 'ok' : 'err';
+    if(!ok && /404/.test(String(txt))){
+      const base = apiBase();
+      statusEl.innerHTML = 'No se pudieron listar usuarios: 404 · <a href="#" id="statusConfigLink">Configurar API</a>';
+      const l = document.getElementById('statusConfigLink');
+      if(l){ l.onclick = (e)=>{ e.preventDefault(); const btn=document.getElementById('apiConfigBtn'); if(btn) btn.click(); }; }
+    } else {
+      statusEl.textContent = txt;
+    }
+  }
 
   // Consultar si la petición viene de ADMIN_IP (para mostrar/ocultar botones admin)
   async function checkAdminIp() {
@@ -73,12 +83,12 @@
   async function fetchUsers(){
     try{
       const base = apiBase();
-      if(!base){
+      if(!base || /github\.io/i.test(base)){
         usersTbody.innerHTML = '';
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>1</td><td>Antony</td><td>amirandreve507@gmail.com</td><td>Manager</td><td>(hash)</td><td>-</td><td><button class="selectBtn" data-id="1" data-nombre="Antony" data-email="amirandreve507@gmail.com">Seleccionar</button></td>`;
         usersTbody.appendChild(tr);
-        setStatus(true,'Demo sin API: listado local');
+        setStatus(true,'Demo sin API: configura tu backend público con el botón');
         return;
       }
       const res = await fetch(base+'/api/usuarios', { headers: token ? { 'Authorization': 'Bearer '+token } : {} });

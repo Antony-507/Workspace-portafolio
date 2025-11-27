@@ -8,6 +8,7 @@
   const apiCheckBtn = document.getElementById('apiCheckBtn');
   const adminLoginBtn = document.getElementById('adminLoginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const checkMyIPBtn = document.getElementById('checkMyIPBtn');
   const mainSection = document.getElementById('main');
   const usersTbody = document.querySelector('#usersTable tbody');
   const refreshBtn = document.getElementById('refreshUsers');
@@ -16,6 +17,9 @@
   const btnAgregar = document.getElementById('btnAgregar');
   const btnModificar = document.getElementById('btnModificar');
   const btnEliminar = document.getElementById('btnEliminar');
+  const bootstrapManagerBtn = document.getElementById('bootstrapManagerBtn');
+  const bootstrapPanel = document.getElementById('bootstrapPanel');
+  const bootstrapExecBtn = document.getElementById('bootstrapExecBtn');
   const panelAgregar = document.getElementById('panelAgregar');
   const panelModificar = document.getElementById('panelModificar');
   const panelEliminar = document.getElementById('panelEliminar');
@@ -213,6 +217,26 @@
     panelModificar.style.display = 'none';
   });
 
+  bootstrapManagerBtn && bootstrapManagerBtn.addEventListener('click', ()=>{
+    bootstrapPanel.style.display = bootstrapPanel.style.display === 'none' ? '' : 'none';
+  });
+
+  bootstrapExecBtn && bootstrapExecBtn.addEventListener('click', async ()=>{
+    const email = document.getElementById('bootstrapEmail').value.trim();
+    const password = document.getElementById('bootstrapPassword').value.trim();
+    if(!email || !password) { setStatus(false,'Completa email y password'); return; }
+    let ip = null;
+    try{ const r = await fetch(apiBase()+'/api/my-ip'); const j = await r.json(); ip = j && j.ip; }catch{}
+    try{
+      const res = await fetch(apiBase()+'/admin/upsert-manager', { method:'POST', headers: { 'Content-Type':'application/json', 'Authorization': token ? 'Bearer '+token : '' }, body: JSON.stringify({ email, password, nombre: 'Antony', ip }) });
+      const data = await res.json();
+      if(!res.ok){ setStatus(false, data.error || 'Error creando Manager'); return; }
+      setStatus(true,'Manager creado/actualizado');
+      bootstrapPanel.style.display='none';
+      fetchUsers();
+    }catch(e){ setStatus(false,'Error creando Manager: '+e.message); }
+  });
+
   document.getElementById('cancelAgregar').addEventListener('click', ()=>{ createUserForm.reset(); panelAgregar.style.display = 'none'; });
   document.getElementById('cancelModificar').addEventListener('click', ()=>{ modifyUserForm.reset(); panelModificar.style.display = 'none'; document.getElementById('modifyHint').style.display=''; modifyUserForm.style.display='none'; });
 
@@ -286,6 +310,10 @@
   checkAdminIp().then(()=>{ fetchUsers(); fetchSessions(); });
   checkApiStatus();
   apiCheckBtn && apiCheckBtn.addEventListener('click', checkApiStatus);
+
+  checkMyIPBtn && checkMyIPBtn.addEventListener('click', async ()=>{
+    try{ const res = await fetch(apiBase()+'/api/my-ip'); const j = await res.json(); setStatus(true,'Tu IP real: '+(j.ip||'desconocida')); }catch(e){ setStatus(false,'No se pudo consultar IP: '+e.message); }
+  });
 
   // Configurar API desde el panel
   const apiConfigBtn = document.getElementById('apiConfigBtn');

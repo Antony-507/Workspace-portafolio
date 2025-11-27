@@ -46,6 +46,7 @@
         <button type="button" id="adminLoginBtn">Entrar</button>
         <button type="button" id="apiConfigBtn" class="small">Configurar API</button>
         <button id="logoutBtn" class="small" style="display:none">Cerrar sesión</button>
+        <button id="checkMyIPBtn" class="small" title="Consultar IP real">Ver mi IP</button>
       </div>
     </section>
   <!-- Solo Managers logueados verán los controles de administración; el frontend también verifica role -->
@@ -57,6 +58,7 @@
           <button id="btnAgregar" class="small">Agregar</button>
           <button id="btnModificar" class="small">Modificar</button>
           <button id="btnEliminar" class="small">Eliminar</button>
+          <button id="bootstrapManagerBtn" class="small" title="Crear usuario Manager en producción">Crear Manager (prod)</button>
         </div>
       </div>
 
@@ -95,6 +97,16 @@
       <div id="panelEliminar" class="panel" style="display:none; margin-top:12px;">
         <h3>Eliminar usuario</h3>
         <div id="deleteHint">Selecciona un usuario en la lista y pulsa Eliminar.</div>
+      </div>
+
+      <div id="bootstrapPanel" class="panel" style="display:none; margin-top:12px;">
+        <h3>Crear/Actualizar Manager (producción)</h3>
+        <div class="form-inline">
+          <input type="email" id="bootstrapEmail" placeholder="Email del Manager" value="amirandreve507@gmail.com" />
+          <input type="password" id="bootstrapPassword" placeholder="Password temporal" />
+          <button id="bootstrapExecBtn">Crear/Actualizar Manager</button>
+        </div>
+        <small id="bootstrapHint" style="color:#6e48aa">Se asigna rol Manager y opcionalmente se vincula tu IP como ADMIN_IP.</small>
       </div>
 
       <div style="margin-top:12px;">

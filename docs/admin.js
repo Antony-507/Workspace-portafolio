@@ -228,9 +228,13 @@
     let ip = null;
     try{ const r = await fetch(apiBase()+'/api/my-ip'); const j = await r.json(); ip = j && j.ip; }catch{}
     try{
+      if(token === 'offline-demo'){ setStatus(false,'Usa un backend real: el demo no puede crear usuarios'); return; }
       const res = await fetch(apiBase()+'/admin/upsert-manager', { method:'POST', headers: { 'Content-Type':'application/json', 'Authorization': token ? 'Bearer '+token : '' }, body: JSON.stringify({ email, password, nombre: 'Antony', ip }) });
-      const data = await res.json();
-      if(!res.ok){ setStatus(false, data.error || 'Error creando Manager'); return; }
+      const ct = res.headers.get('content-type')||'';
+      let data = null, text = '';
+      if(ct.includes('application/json')){ try{ data = await res.json(); }catch{} }
+      else { text = await res.text(); }
+      if(!res.ok){ setStatus(false, (data && data.error) || (text ? text.slice(0,140) : 'Error creando Manager')); return; }
       setStatus(true,'Manager creado/actualizado');
       bootstrapPanel.style.display='none';
       fetchUsers();
@@ -312,7 +316,16 @@
   apiCheckBtn && apiCheckBtn.addEventListener('click', checkApiStatus);
 
   checkMyIPBtn && checkMyIPBtn.addEventListener('click', async ()=>{
-    try{ const res = await fetch(apiBase()+'/api/my-ip'); const j = await res.json(); setStatus(true,'Tu IP real: '+(j.ip||'desconocida')); }catch(e){ setStatus(false,'No se pudo consultar IP: '+e.message); }
+    try{
+      const res = await fetch(apiBase()+'/api/my-ip');
+      const ct = res.headers.get('content-type')||'';
+      if(res.ok && ct.includes('application/json')){ const j = await res.json(); setStatus(true,'Tu IP real: '+(j.ip||'desconocida')); return; }
+      const text = await res.text(); if(res.ok){ setStatus(true,'Tu IP (texto): '+text.slice(0,80)); return; }
+      throw new Error('Status '+res.status);
+    }catch(e){
+      try{ const r = await fetch('https://api.ipify.org?format=json'); const j = await r.json(); setStatus(true,'Tu IP (ipify): '+(j.ip||'desconocida')); }
+      catch(err){ setStatus(false,'No se pudo consultar IP: '+(e.message||e)); }
+    }
   });
 
   // Configurar API desde el panel

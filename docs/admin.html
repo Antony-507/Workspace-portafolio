@@ -33,6 +33,11 @@
         <button id="saveExitBtn" class="small">Guardar y salir</button>
       </div>
     </div>
+    <div id="apiBanner" style="display:flex;align-items:center;gap:.6rem;background:#f7f4ff;border:1px solid #e7e3f3;border-radius:12px;padding:.6rem 1rem;margin-bottom:10px">
+      <span id="apiStatusBadge" style="display:inline-block;padding:.35rem .6rem;border-radius:999px;background:#ddd;color:#333;font-weight:600">API: verificando…</span>
+      <span id="apiLatency" style="color:#6e48aa"></span>
+      <button id="apiCheckBtn" class="small" style="margin-left:auto">Verificar API</button>
+    </div>
     <div id="status" style="margin-bottom:.6rem;color:#6e48aa"></div>
     <section id="auth">
       <div class="form-inline">

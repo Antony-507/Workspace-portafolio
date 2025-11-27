@@ -3,6 +3,9 @@
   const apiBase = () => localStorage.getItem('api_base') || API_DEFAULT;
   async function fetchJson(path, opts){ const base = apiBase(); const url = (base?base:'') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ try{ const j = await resp.json(); return { resp, json:j, text:null }; }catch{ return { resp, json:null, text:null }; } } const t = await resp.text(); return { resp, json:null, text:t }; }
   const statusEl = document.getElementById('status');
+  const apiStatusBadge = document.getElementById('apiStatusBadge');
+  const apiLatencyEl = document.getElementById('apiLatency');
+  const apiCheckBtn = document.getElementById('apiCheckBtn');
   const adminLoginBtn = document.getElementById('adminLoginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const mainSection = document.getElementById('main');
@@ -31,6 +34,23 @@
     } else {
       statusEl.textContent = txt;
     }
+  }
+
+  async function checkApiStatus(){
+    const start = performance.now();
+    let ok = false, db = '', latency = 0;
+    try{
+      const res = await fetch(apiBase()+'/health', { cache:'no-store' });
+      latency = Math.round(performance.now()-start);
+      if(res.ok){ const j = await res.json(); ok = !!j.ok; db = j.db || ''; }
+    }catch(e){ latency = Math.round(performance.now()-start); ok = false; }
+    if(apiStatusBadge){
+      apiStatusBadge.textContent = ok ? `API: conectada (${db||'OK'})` : 'API: sin conexión';
+      apiStatusBadge.style.background = ok ? '#d7f3e3' : '#ffe0e0';
+      apiStatusBadge.style.color = ok ? '#2b8a3e' : '#a33';
+    }
+    if(apiLatencyEl){ apiLatencyEl.textContent = `Latencia: ${latency} ms`; }
+    return ok;
   }
 
   // Consultar si la petición viene de ADMIN_IP (para mostrar/ocultar botones admin)
@@ -250,6 +270,8 @@
 
   // Al cargar, intentar listar (sin token mostrará la lista pública si existe)
   checkAdminIp().then(()=>{ fetchUsers(); fetchSessions(); });
+  checkApiStatus();
+  apiCheckBtn && apiCheckBtn.addEventListener('click', checkApiStatus);
 
   // Configurar API desde el panel
   const apiConfigBtn = document.getElementById('apiConfigBtn');

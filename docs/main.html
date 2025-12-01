@@ -307,24 +307,24 @@ if(hideBtn) hideBtn.onclick = function() {
     updateSelectionUI();
 };
 // Al cargar, ocultar los que están en localStorage si es invitado
-function applyHiddenForGuest() {
-    if(sessionStorage.getItem('usuario') !== 'Antony') {
-        let hidden = getHiddenItems();
-        document.querySelectorAll('.gallery-item').forEach(item => {
-            if(hidden[getItemKey(item)]) {
-                item.setAttribute('data-visible', 'false');
-                item.style.display = 'none';
-            }
-        });
+    function applyHiddenForGuest() {
+        if(sessionStorage.getItem('role') !== 'Manager') {
+            let hidden = getHiddenItems();
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                if(hidden[getItemKey(item)]) {
+                    item.setAttribute('data-visible', 'false');
+                    item.style.display = 'none';
+                }
+            });
+        }
     }
-}
 window.addEventListener('DOMContentLoaded', applyHiddenForGuest);
 // Estilo visual para selección
 const style = document.createElement('style');
 style.textContent = `.gallery-item.selected { outline: 3px solid #9d50bb; box-shadow: 0 0 0 4px #e0c6f7; }`;
 document.head.appendChild(style);
 // Botón para mostrar/recuperar archivos ocultos (solo Antony)
-if(sessionStorage.getItem('usuario') === 'Antony') {
+if(sessionStorage.getItem('role') === 'Manager') {
     const showHiddenBtn = document.createElement('button');
     showHiddenBtn.id = 'showHiddenBtn';
     showHiddenBtn.textContent = 'Mostrar ocultos';

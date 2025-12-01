@@ -46,8 +46,7 @@
                         <div style="height:0.5rem"></div>
                         <div class="row">
                             <button type="button" id="guestBtn" class="small-btn" style="background:#eee;">Modo Invitado</button>
-                            <button type="button" id="adminPanelBtn" class="small-btn" style="background:#444; color:white;">Panel de administración</button>
-                            <button type="button" id="apiConfigBtn" class="small-btn" style="background:#eee;">Configurar API</button>
+                            <button type="button" id="adminPanelBtn" class="small-btn" style="background:#444; color:white; display:none;">Panel de administración</button>
                         </div>
                     </form>
                 </div>
@@ -67,8 +66,7 @@
                     }
                     obtenerIPyGuardar();
                     const API_DEFAULT = 'https://workspace-portafolio-api.onrender.com';
-                    function apiBase(){ const v=(localStorage.getItem('api_base')||'').trim(); if(!/^https?:\/\//i.test(v) || /github\.io/i.test(v)) return API_DEFAULT; return v.replace(/\/$/,''); }
-                    function setApiBase(v){ if(v){ localStorage.setItem('api_base', v); } else { localStorage.removeItem('api_base'); } }
+                    function apiBase(){ return API_DEFAULT; }
                     async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ try{ const j = await resp.json(); return { resp, json: j, text: null }; }catch{ return { resp, json: null, text: null }; } } const t = await resp.text(); return { resp, json: null, text: t }; }
             
                     // Manejo del formulario: intentar login en el backend (/api/login)
@@ -81,10 +79,7 @@
                                 payload = { email: identifier, password };
                                 ({ resp, json, text } = await fetchJson('/api/login', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) }));
                             }
-                            if (!resp.ok && !isEmail && identifier.toLowerCase() === 'antony') {
-                                payload = { email: 'amirandreve507@gmail.com', password };
-                                ({ resp, json, text } = await fetchJson('/api/login', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) }));
-                            }
+                            
                             if (!resp.ok) {
                                 const msg = (json && json.error) ? json.error : (text ? text.slice(0,160) : 'Login fallido');
                                 alert(msg);
@@ -100,7 +95,6 @@
                                 if (json.ip) sessionStorage.setItem('ipUser', json.ip);
                                 if (typeof json.ipAllowed !== 'undefined') sessionStorage.setItem('ipAllowed', String(!!json.ipAllowed));
                                 if (typeof json.canUpload !== 'undefined') sessionStorage.setItem('canUpload', String(!!json.canUpload));
-                                if (json.user.passwordHash) sessionStorage.setItem('passwordHash', json.user.passwordHash);
                             }
                             sessionStorage.removeItem('guestMode');
                             window.location.href = 'index.html';
@@ -128,7 +122,9 @@
                     function updateAdminBtnVisibility() {
                         const btn = document.getElementById('adminPanelBtn');
                         const role = sessionStorage.getItem('role');
-                        if (role === 'Manager') {
+                        const token = sessionStorage.getItem('token');
+                        const guest = sessionStorage.getItem('guestMode') === 'true';
+                        if (role === 'Manager' && token && !guest) {
                             btn.style.display = '';
                         } else {
                             btn.style.display = 'none';
@@ -146,17 +142,30 @@
                         }
                     });
 
-                    document.getElementById('apiConfigBtn').addEventListener('click', async function(){
-                        let current = apiBase() || '(no definida)';
-                        if(current && current.trim().startsWith('{')) { localStorage.removeItem('api_base'); current = '(no definida)'; }
-                        const v = prompt('API Base (ejemplo: https://tu-backend-publico)\nActual: '+current+'\nDeja vacío para usar la API predeterminada:', current==='(no definida)'?API_DEFAULT:current);
-                        if(v===null) return;
-                        const trimmed = (v||'').trim();
-                        if(!trimmed) { setApiBase(''); alert('Usando API predeterminada: '+API_DEFAULT); return; }
-                        if(!/^https?:\/\//i.test(trimmed)) { alert('Ingresa una URL válida que comience con http:// o https://'); return; }
-                        setApiBase(trimmed.replace(/\/$/, ''));
-                        alert('API configurada en: '+apiBase()+'\nEl login usará '+apiBase()+'/api/login');
-                    });
+                    // Validación en tiempo real de credenciales contra SQL Server
+                    const liveStatus = document.createElement('div');
+                    liveStatus.id = 'liveCredStatus';
+                    liveStatus.style = 'margin-top:.5rem;color:#6e48aa;font-size:.9rem';
+                    document.querySelector('.login-container').appendChild(liveStatus);
+                    let typingTimer = null;
+                    const debounce = (fn, ms)=>{ return (...args)=>{ clearTimeout(typingTimer); typingTimer = setTimeout(()=>fn(...args), ms); } };
+                    async function checkCredentials(identifier, password){
+                        if(!identifier || !password){ liveStatus.textContent=''; return; }
+                        try{
+                            const r = await fetch(apiBase()+'/admin/check-sql-credentials', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ identifier, password }) });
+                            const j = await r.json();
+                            if(!r.ok){ liveStatus.textContent = 'Error validando: '+(j.error||r.status); return; }
+                            if(j.ok){ liveStatus.textContent = j.type==='server_login' ? 'Login SQL Server válido' : 'Usuario de tabla válido'; }
+                            else { liveStatus.textContent = 'Credenciales no válidas'; }
+                        }catch(e){ liveStatus.textContent = 'Error de red: '+e.message; }
+                    }
+                    const onInput = debounce(()=>{
+                        const identifier = document.getElementById('username').value.trim();
+                        const password = document.getElementById('password').value.trim();
+                        checkCredentials(identifier, password);
+                    }, 600);
+                    document.getElementById('username').addEventListener('input', onInput);
+                    document.getElementById('password').addEventListener('input', onInput);
 
                     (function(){ if(location.hostname.endsWith('github.io') && !localStorage.getItem('api_base')){ const h = document.createElement('div'); h.style.cssText='max-width:520px;margin:0 auto 10px auto;text-align:center;color:#6e48aa;font-size:0.9rem'; h.textContent='Configura tu API para login real o usa Modo Invitado'; document.querySelector('.login-container').insertAdjacentElement('beforebegin', h); } })();
                 </script>

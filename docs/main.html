@@ -87,12 +87,14 @@
                 showSection(this.id.replace('menu','').toLowerCase());
             };
         });
-        // Subida real: requiere token y rol/IP permitido
+        const API_DEFAULT = 'https://workspace-portafolio-api.onrender.com';
+        const apiBase = ()=> localStorage.getItem('api_base') || API_DEFAULT;
+        // Subida real: requiere token y rol
         const token = sessionStorage.getItem('token');
         const role = sessionStorage.getItem('role');
+        const canUpload = (sessionStorage.getItem('canUpload') === 'true') || role === 'Manager' || role === 'Uploader';
         const ipAllowed = sessionStorage.getItem('ipAllowed') === 'true';
-        const apiBaseCfg = localStorage.getItem('api_base')||'';
-        if(apiBaseCfg && (role === 'Manager' || ipAllowed) && sessionStorage.getItem('guestMode') !== 'true') {
+        if(token && canUpload && ipAllowed && sessionStorage.getItem('guestMode') !== 'true') {
             document.getElementById('uploadBtnLi').style.display = 'block';
             document.getElementById('uploadBtn').addEventListener('click', function() {
                 const input = document.createElement('input');
@@ -103,7 +105,7 @@
                         if(!(file.type.startsWith('image') || file.type.startsWith('video'))) { alert('Solo PNG/JPEG o MP4'); continue; }
                         const fd = new FormData(); fd.append('file', file);
                         try{
-                          const resp = await fetch(apiBaseCfg+'/api/upload', { method:'POST', headers: token ? { 'Authorization':'Bearer '+token } : {}, body: fd });
+                          const resp = await fetch(apiBase()+'/api/upload', { method:'POST', headers: token ? { 'Authorization':'Bearer '+token } : {}, body: fd });
                           const j = await resp.json(); if(!resp.ok){ alert(j.error||'Fallo al subir'); continue; }
                           appendToGallery(j.url);
                         }catch(err){ alert('Error de red: '+err.message); }
@@ -153,7 +155,7 @@
                 this.classList.remove('btn-pressed');
             });
         });
-        fetch('/api/my-ip').then(r=>r.json()).then(j=>{ const el=document.getElementById('ipInfo'); if(el) el.textContent = 'Tu IP: ' + (j && j.ip ? j.ip : 'desconocida'); }).catch(()=>{});
+        fetch(apiBase()+'/api/my-ip').then(r=>r.json()).then(j=>{ const el=document.getElementById('ipInfo'); if(el) el.textContent = 'Tu IP: ' + (j && j.ip ? j.ip : 'desconocida'); }).catch(()=>{});
         // Funciones de galería real
         function appendToGallery(url){
           const section = window.currentSection;
@@ -165,8 +167,7 @@
         }
         async function loadFiles(){
           try{
-            const base = (localStorage.getItem('api_base')||''); if(!base){ return; }
-            const resp = await fetch(base+'/api/files'); const files = await resp.json();
+            const resp = await fetch(apiBase()+'/api/files'); const files = await resp.json();
             ['disenos','juegos','desarrollos','educacion','personales'].forEach(s=>{ const g=document.getElementById('gallery-'+s); if(g) g.innerHTML=''; });
             files.forEach(f=>{ appendToGallery(f.Url || f.url); });
           }catch(e){}

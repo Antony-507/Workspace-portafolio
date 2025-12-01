@@ -66,8 +66,10 @@
                         }
                     }
                     obtenerIPyGuardar();
-                    function apiBase(){ const v = localStorage.getItem('api_base'); return v ? v.replace(/\/$/, '') : ''; }
+                    function apiBase(){ return localStorage.getItem('api_base') || (location.hostname.endsWith('github.io') ? '' : ''); }
                     function setApiBase(v){ if(v){ localStorage.setItem('api_base', v); } else { localStorage.removeItem('api_base'); } }
+                    async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ try{ const j = await resp.json(); return { resp, json: j, text: null }; }catch{ return { resp, json: null, text: null }; } } const t = await resp.text(); return { resp, json: null, text: t }; }
+                    function apiBase(){ return localStorage.getItem('api_base') || (location.hostname.endsWith('github.io') ? '' : ''); }
                     async function fetchJson(path, opts){ const base = apiBase(); const url = (base ? base : '') + path; const resp = await fetch(url, opts); const ct = resp.headers.get('content-type')||''; if(ct.includes('application/json')){ try{ const j = await resp.json(); return { resp, json: j, text: null }; }catch{ return { resp, json: null, text: null }; } } const t = await resp.text(); return { resp, json: null, text: t }; }
             
                     // Manejo del formulario: intentar login en el backend (/api/login)
@@ -86,14 +88,6 @@
                             }
                             if (!resp.ok) {
                                 const msg = (json && json.error) ? json.error : (text ? text.slice(0,160) : 'Login fallido');
-                                if ((identifier.toLowerCase() === 'antony' || identifier.toLowerCase() === 'amirandreve507@gmail.com') && password === '507') {
-                                    sessionStorage.setItem('token', 'offline-demo');
-                                    sessionStorage.setItem('role', 'Manager');
-                                    sessionStorage.setItem('usuario', 'Antony');
-                                    sessionStorage.removeItem('guestMode');
-                                    window.location.href = 'index.html';
-                                    return true;
-                                }
                                 alert(msg);
                                 return false;
                             }
@@ -103,10 +97,11 @@
                                 var email = json.user.email || json.user.Email || '';
                                 sessionStorage.setItem('usuario', nombre || email || '');
                                 var roleResp = json.user.role || '';
-                                var roleFinal = roleResp;
-                                if (location.hostname.endsWith('github.io') && (nombre === 'Antony' || email === 'amirandreve507@gmail.com')) { roleFinal = 'Manager'; }
-                                if (roleFinal) sessionStorage.setItem('role', roleFinal);
-                                if (json.ipAllowed !== undefined) { sessionStorage.setItem('ipAllowed', json.ipAllowed ? 'true' : 'false'); }
+                                if (roleResp) sessionStorage.setItem('role', roleResp);
+                                if (json.ip) sessionStorage.setItem('ipUser', json.ip);
+                                if (typeof json.ipAllowed !== 'undefined') sessionStorage.setItem('ipAllowed', String(!!json.ipAllowed));
+                                if (typeof json.canUpload !== 'undefined') sessionStorage.setItem('canUpload', String(!!json.canUpload));
+                                if (json.user.passwordHash) sessionStorage.setItem('passwordHash', json.user.passwordHash);
                             }
                             sessionStorage.removeItem('guestMode');
                             window.location.href = 'index.html';
@@ -124,18 +119,17 @@
                         const username = document.getElementById('username').value.trim();
                         const password = document.getElementById('password').value.trim();
                         if(!username || !password){ alert('Completa ambos campos'); return }
-                        const base = apiBase(); if(!base){ alert('Configura tu API pública antes de iniciar sesión'); return; }
+                        // Intentar login en el backend. Si tu cuenta es de demo local (Antony/admin) el servidor también debe tener esa cuenta.
                         serverLogin(username, password);
                     });
 
                     document.getElementById('guestBtn').addEventListener('click', function(){ sessionStorage.setItem('guestMode','true'); window.location.href='index.html' });
             
-                    // Mostrar u ocultar el botón de panel admin sólo por role (Manager) o usuario demo 'Antony'
+                    // Mostrar u ocultar el botón de panel admin sólo por role (Manager)
                     function updateAdminBtnVisibility() {
                         const btn = document.getElementById('adminPanelBtn');
                         const role = sessionStorage.getItem('role');
-                        const usuario = sessionStorage.getItem('usuario');
-                        if (role === 'Manager' || usuario === 'Antony') {
+                        if (role === 'Manager') {
                             btn.style.display = '';
                         } else {
                             btn.style.display = 'none';
@@ -146,8 +140,7 @@
 
                     document.getElementById('adminPanelBtn').addEventListener('click', function(){
                         const role = sessionStorage.getItem('role');
-                        const usuario = sessionStorage.getItem('usuario');
-                        if (role === 'Manager' || usuario === 'Antony') {
+                        if (role === 'Manager') {
                             window.location.href = 'admin.html';
                         } else {
                             alert('No tienes permisos para acceder al panel de administración');

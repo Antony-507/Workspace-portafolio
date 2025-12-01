@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portafolio - Redirección</title>
-  <meta http-equiv="refresh" content="0; url=login.html">
-  <script>window.location.replace('login.html');</script>
+  <script>
+    try{
+      const guest = sessionStorage.getItem('guestMode') === 'true';
+      const user = sessionStorage.getItem('usuario');
+      const token = sessionStorage.getItem('token');
+      if(guest || user || token){ window.location.replace('main.html'); }
+      else { window.location.replace('login.html'); }
+    }catch(e){ window.location.replace('login.html'); }
+  </script>
 </head>
 <body>
   Redirigiendo a la página de inicio de sesión...
